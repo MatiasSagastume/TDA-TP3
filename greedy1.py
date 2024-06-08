@@ -1,5 +1,5 @@
 def greedy1(maestros, k):
-    maestros = sorted(maestros)
+    maestros = sorted(maestros, key = lambda x: -x[1])
     conjuntos = []
     for i in range(k):
         conjuntos.append(set())
@@ -16,9 +16,16 @@ def encontrar_minimo(conjuntos):
             minimo = conj
     return minimo
 
+
 def sumatoria(conj):
     res = 0
     for elemento in conj:
         res += elemento[1]
     return res
 
+
+def calcular_coeficiente(grupos):
+    res = 0
+    for g in grupos:
+        res += sumatoria(g) ** 2
+    return res
