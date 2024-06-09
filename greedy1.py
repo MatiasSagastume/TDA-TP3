@@ -1,5 +1,5 @@
 def greedy1(maestros, k):
-    maestros = sorted(maestros, key = lambda x: -x[1])
+    maestros = sorted(maestros, key=lambda x: -x[1])
     conjuntos = []
     for i in range(k):
         conjuntos.append(set())

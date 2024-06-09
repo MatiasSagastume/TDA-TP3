@@ -19,7 +19,7 @@ def backtracking(archivo):
 
 
 def _backtracking(maestros, conjuntos, actual, resultado_actual):
-    if esMayor(conjuntos, resultado_actual[1]) or ya_no_llega(conjuntos, resultado_actual[1], actual, maestros):
+    if es_mayor(conjuntos, resultado_actual[1]) or ya_no_llega(conjuntos, resultado_actual[1], actual, maestros):
         return
     if actual == len(maestros):
         nuevo = copiar_grupos(conjuntos)
@@ -39,9 +39,10 @@ def copiar_grupos(conjuntos):
     return res
 
 
-def esMayor(nuevo, actual):
+def es_mayor(nuevo, actual):
     sumatoria_nuevo = calcular_sumatoria_grupo(nuevo)
     return sumatoria_nuevo >= actual
+
 
 def ya_no_llega(nuevo, actual, n, maestros):
     sumatoria_nuevo = calcular_sumatoria_grupo(nuevo)
@@ -50,16 +51,12 @@ def ya_no_llega(nuevo, actual, n, maestros):
     return sumatoria_nuevo >= actual
 
 
-def sumatoria_desde(n, maestros):
-    res = 0
-
-
-
 def calcular_sumatoria_grupo(grupo):
     res = 0
     for c in grupo:
         res += sumatoria(c) ** 2
     return res
+
 
 def sumatoria(conj):
     res = 0
@@ -87,7 +84,7 @@ def leer_archivo(archivo):
 
 
 inicio = time.time()
-print(calcular_coeficiente(backtracking("CasosCatedra/20_8.txt")))
+print(calcular_coeficiente(backtracking("CasosCatedra/14_4.txt")))
 fin = time.time()
 print(fin - inicio)
 
