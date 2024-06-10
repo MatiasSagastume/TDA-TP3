@@ -1,5 +1,3 @@
-import time
-
 import greedy1
 
 SALTO_DE_PAGINA = "\n"
@@ -81,10 +79,3 @@ def leer_archivo(archivo):
             nombre, habilidad = linea.rstrip(SALTO_DE_PAGINA).split(SEPARADOR)
             maestros.append((nombre, int(habilidad)))
     return k, maestros
-
-
-inicio = time.time()
-print(calcular_coeficiente(backtracking("CasosCatedra/14_4.txt")))
-fin = time.time()
-print(fin - inicio)
-

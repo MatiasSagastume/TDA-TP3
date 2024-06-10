@@ -1,0 +1,23 @@
+# #La primera linea indica la cantidad de grupos a formar, las siguientes son de la forma 'nombre maestro, habilidad'
+7
+0, 1001
+1, 477
+2, 1145
+3, 269
+4, 83
+5, 299
+6, 22
+7, 1259
+8, 1261
+9, 702
+10, 1044
+11, 114
+12, 847
+13, 305
+14, 872
+15, 1941
+16, 1126
+17, 65
+18, 274
+19, 1927
+20, 1400
