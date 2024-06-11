@@ -28,6 +28,8 @@ def _backtracking(maestros, conjuntos, actual, resultado_actual):
         conj.add(maestros[actual])
         _backtracking(maestros, conjuntos, actual + 1, resultado_actual)
         conj.remove(maestros[actual])
+        if not conj:
+            break
 
 
 def copiar_grupos(conjuntos):
