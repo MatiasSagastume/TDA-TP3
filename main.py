@@ -34,7 +34,8 @@ def main():
             i = 1
             for g in grupos:
                 archivo.write(f"{TEXTO_GRUPO} {i}{SEPARADOR} {unir_grupo(g)}{SALTO_DE_LINEA}")
-            archivo.write(f"{TEXTO_COEFICIENTE} {backtracking.calcular_coeficiente(grupos)}")
+                i += 1
+            archivo.write(f"{TEXTO_COEFICIENTE}{backtracking.calcular_coeficiente(grupos)}")
     except Exception:
         print(MENSAJE_ERROR_RUTA)
 
@@ -44,3 +45,6 @@ def unir_grupo(grupo):
     for elem in grupo:
         res.append(elem[POS_NOMBRE])
     return SEPARADOR_GRUPOS.join(res)
+
+
+main()
