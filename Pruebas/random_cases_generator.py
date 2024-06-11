@@ -9,14 +9,20 @@ def random_cases_generator(ruta, k):
     with open(ruta, "w") as archivo:
         archivo.write(PRIMER_LINEA + SALTO_DE_LINEA)
         archivo.write(f"{k}\n")
-        for i in range(3 * k):
-            valor = random.randint(0, 2000)
-            archivo.write(f"{indice}, {valor}" + SALTO_DE_LINEA)
-            indice += 1
+        suma_grupo = random.randint(600, 3000)
+        for i in range(k):
+            actual = suma_grupo
+            while actual > 0:
+                valor = random.randint(int(suma_grupo / 3), suma_grupo)
+                if valor > actual:
+                    valor = actual
+                actual -= valor
+                archivo.write(f"{indice}, {valor}" + SALTO_DE_LINEA)
+                indice += 1
+
 
 indice = 0
-for i in range(2, 5):
+for i in range(6, 40):
     for n in range(20):
-        random_cases_generator(f"casosComparacion/caso{i}_{n}.txt", i)
+        random_cases_generator(f"casosInmanejables/caso{indice}.txt", i)
         indice += 1
-

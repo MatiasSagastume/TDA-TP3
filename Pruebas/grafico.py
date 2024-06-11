@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 import pulp
 
@@ -74,6 +76,8 @@ def _backtracking(maestros, conjuntos, actual, resultado_actual):
         conj.add(maestros[actual])
         _backtracking(maestros, conjuntos, actual + 1, resultado_actual)
         conj.remove(maestros[actual])
+        if not conj:
+            break
 
 
 def copiar_grupos(conjuntos):
@@ -113,7 +117,6 @@ def leer_archivo(archivo):
     return k, maestros
 
 
-
 def pl(maestros, k):
     problema = pulp.LpProblem("problema", pulp.LpMinimize)
     grupos = range(k)
@@ -143,20 +146,19 @@ def pl(maestros, k):
     return res
 
 
-
 def graficar_aproximacion_greedy():
     listaTamanios = []
     listaDuraciones = []
-    for i in range(2, 4):
+    for i in range(2, 6):
         promedio = 0
-        for n in range(20):
+        for n in range(4):
             caso = f"casosComparacion/caso{i}_{n}.txt"
             k, maestros = leer_archivo(caso)
             resultado_backtracking = calcular_coeficiente(backtracking(caso))
             resultado_greedy = calcular_coeficiente(greedy1(maestros, k))
             promedio += resultado_greedy / resultado_backtracking
         listaTamanios.append(i)
-        listaDuraciones.append(promedio / 20)
+        listaDuraciones.append(promedio / 4)
     plt.figure(figsize=(10, 6))
     plt.plot(listaTamanios, listaDuraciones, marker='o', linestyle='-')
     plt.title('Gráfico de Backtracking vs Greedy')
@@ -171,19 +173,20 @@ def graficar_aproximacion_casos_inmanejables_greedy():
     listaTamanios = []
     listaDuraciones = []
     indice = 0
-    for i in range(6, 15):
+    for i in range(6, 40):
+        promedio = 0
         for n in range(20):
             caso = f"casosInmanejables/caso{indice}.txt"
             k, maestros = leer_archivo(caso)
             resultado = k * ((sumatoria(set(maestros)) / k) ** 2)
             resultado_greedy = calcular_coeficiente(greedy1(maestros, k))
-            r_a = resultado_greedy / resultado
-            listaDuraciones.append(r_a)
-            listaTamanios.append(indice)
+            promedio += resultado_greedy / resultado
             indice += 1
+        listaDuraciones.append(promedio / 20)
+        listaTamanios.append(i)
     plt.figure(figsize=(10, 6))
     plt.plot(listaTamanios, listaDuraciones, marker='o', linestyle='-')
-    plt.title('Gráfico de Greedy vs Resultado')
+    plt.title('Gráfico de Aproximación Greedy vs Solución Óptima')
     plt.ylabel('r(A)')
     plt.grid(True)
     plt.tight_layout()
@@ -211,4 +214,25 @@ def graficar_aproximacion_pl():
     plt.show()
 
 
-graficar_aproximacion_pl()
+def graficar_backtracking_tiempo():
+    listaTamanios = []
+    listaDuraciones = []
+    indice = 0
+    for i in range(2, 6):
+        for n in range(4):
+            caso = f"casosComparacion/caso{i}_{n}.txt"
+            inicio = time.time()
+            resultado_backtracking = calcular_coeficiente(backtracking(caso))
+            fin = time.time()
+            listaTamanios.append(indice)
+            listaDuraciones.append((fin - inicio))
+            indice += 1
+    plt.figure(figsize=(10, 6))
+    plt.plot(listaTamanios, listaDuraciones, marker='o', linestyle='-')
+    plt.title('Gráfico de Tamaño vs Tiempo')
+    plt.ylabel('Tiempo (s)')
+    plt.grid(True)
+    plt.show()
+
+
+graficar_aproximacion_casos_inmanejables_greedy()
