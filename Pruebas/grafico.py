@@ -193,24 +193,57 @@ def graficar_aproximacion_casos_inmanejables_greedy():
     plt.show()
 
 
+def graficar_tiempo_aproximacion_pl():
+    listaTamanios_bt = []
+    listaDuraciones_bt = []
+    listaTamanios_pl = []
+    listaDuraciones_pl = []
+    indice = 0
+    for i in range(2, 5):
+        for n in range(4):
+            caso = f"casosComparacion/caso{i}_{n}.txt"
+            k, maestros = leer_archivo(caso)
+            inicio = time.time()
+            calcular_coeficiente(backtracking(caso))
+            fin = time.time()
+            listaDuraciones_bt.append(fin - inicio)
+            listaTamanios_bt.append(indice)
+            inicio = time.time()
+            calcular_coeficiente(pl(maestros, k))
+            fin = time.time()
+            listaDuraciones_pl.append(fin - inicio)
+            listaTamanios_pl.append(indice)
+            indice += 1
+    plt.figure(figsize=(10, 6))
+    plt.plot(listaTamanios_bt, listaDuraciones_bt, marker='o', linestyle='-', color="blue")
+    plt.plot(listaTamanios_pl, listaDuraciones_pl, marker='o', linestyle='-', color="red")
+    plt.title('Comparación de Tiempo Backtracking vs Programación Lineal')
+    plt.ylabel('Tiempo (s)')
+    plt.grid(True)
+    plt.show()
+
 def graficar_aproximacion_pl():
     listaTamanios = []
     listaDuraciones = []
     indice = 0
-    for i in range(2, 5):
-        for n in range(20):
+    for i in range(2, 6):
+        promedio = 0
+        for n in range(4):
             caso = f"casosComparacion/caso{i}_{n}.txt"
             k, maestros = leer_archivo(caso)
-            resultado_backtracking = calcular_coeficiente(backtracking(caso))
-            resultado_pl = calcular_coeficiente(pl(maestros, k))
-            listaDuraciones.append(resultado_pl / resultado_backtracking)
-            listaTamanios.append(indice)
+            sol_optima = calcular_coeficiente(backtracking(caso))
+            sol_pl = calcular_coeficiente(pl(maestros, k))
             indice += 1
+            promedio += sol_pl / sol_optima
+        listaTamanios.append(i)
+        listaDuraciones.append(promedio / 4)
     plt.figure(figsize=(10, 6))
-    plt.plot(listaTamanios, listaDuraciones, marker='o', linestyle='-')
-    plt.title('Gráfico de Backtracking vs Programación Lineal')
+    plt.plot(listaTamanios, listaDuraciones, marker='o', linestyle='-', color="blue")
+    plt.title('Backtracking vs Programación Lineal')
+    plt.xlabel('Cantidad de grupos')
     plt.ylabel('r(A)')
     plt.grid(True)
+    plt.gcf().axes[0].yaxis.get_major_formatter().set_scientific(False)
     plt.show()
 
 
@@ -235,4 +268,4 @@ def graficar_backtracking_tiempo():
     plt.show()
 
 
-graficar_aproximacion_casos_inmanejables_greedy()
+graficar_aproximacion_pl()
