@@ -25,4 +25,4 @@ Para correr el programa desde Linux:
 ```
 ./programacion_lineal2 <ruta del archivo .txt con las batallas>
 ```
-Ejemplo: ./programacion_lineal2 Casos/CasosCatedra/10_3.txt
+Ejemplo: ./programacion_lineal2 ../Casos/CasosCatedra/10_3.txt
