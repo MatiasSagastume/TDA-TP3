@@ -1,22 +1,28 @@
 # TP3 - Teoría de Algoritmos 
-### Para correr el algorimto de Backtracking
 
-```bash
-python3 main.py <direccion del archivo .txt a probar>
-```
-El resultado de la ejecución será almacenado en "resultado.txt" en la carpeta raíz del proyecto.
+### Para correr el algoritmo de backtracking
 
-##### Ejemplo:
-```bash
-python3 main.py CasosCatedra/14_3.txt
+Para correr el programa desde Linux:
+
 ```
+./main <ruta del archivo .txt con las batallas>
+```
+Ejemplo: ./main Casos/CasosCatedra/10_3.txt
+
+Una vez ejecutado, el resultado de la prueba no será mostrado por el terminal, si no que será almacenado en `resultado.txt` en el directorio actual.
+
+En caso de querer guardarlo en una ruta especifica ingresar:
+
+```
+./main <ruta del archivo .txt con las batallas> -guardar <ruta de guardado incluyendo el nombre del archivo>.txt 
+```
+Nota: El ejecutable main requiere estar en el mismo directorio que el directorio _internal.
 
 ### Para correr el algoritmo de Programación lineal:
 
-```bash
-python3 programacion_lineal.py <direccion del archivo .txt a probar>
+Para correr el programa desde Linux:
+
 ```
-##### Ejemplo:
-```bash
-python3 programacion_lineal.py CasosCatedra/14_3.txt
+./programacion_lineal2 <ruta del archivo .txt con las batallas>
 ```
+Ejemplo: ./programacion_lineal2 ../Casos/CasosCatedra/10_3.txt
