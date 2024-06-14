@@ -27,12 +27,3 @@ def aproximacion_pl(maestros, k):
                 res[g].add(maestro)
     return res
 
-
-maestros = [("Hasook", 120),
-            ("Hama", 445),
-            ("Senna", 546),
-            ("Hama I", 222),
-            ("Wei", 551),
-            ("Wei I", 330)]
-
-print(aproximacion_pl(maestros, 4))

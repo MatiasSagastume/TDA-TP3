@@ -3,6 +3,8 @@ import time
 import matplotlib.pyplot as plt
 import pulp
 
+import aproximacion
+
 SALTO_DE_PAGINA = "\n"
 POS_MINUTO_0 = 0
 MINUTO_INICIAL = 1
@@ -118,33 +120,37 @@ def leer_archivo(archivo):
 
 
 def pl(maestros, k):
-    problema = pulp.LpProblem("problema", pulp.LpMinimize)
-    grupos = range(k)
-    res = []
-    for g in grupos:
-        res.append(set())
-    y = pulp.LpVariable.dict("maestros", (grupos, maestros), cat=pulp.LpBinary)
-    for maestro in maestros:
-        ecuacion = 0
-        for g in grupos:
-            ecuacion += y[(g,maestro)]
-        problema += ecuacion == 1
-    sumatoria = []
-    for g in grupos:
-        sumatoria.append(pulp.lpSum([y[(g, maestro)] * maestro[1] for maestro in maestros]))
-    maximo = pulp.LpVariable("GRUPO_MAX", cat=pulp.LpInteger)
-    minimo = pulp.LpVariable("GRUPO_MIN", cat=pulp.LpInteger)
-    for suma in sumatoria:
-        problema += maximo >= suma
-        problema += minimo <= suma
-    problema += maximo - minimo
-    problema.solve()
-    for maestro in maestros:
-        for g in grupos:
-            if pulp.value(y[(g, maestro)]) > 0:
-                res[g].add(maestro)
-    return res
 
+    modelo = pulp.LpProblem("DistribucionMaestrosAgua", pulp.LpMinimize)
+
+    y = pulp.LpVariable.dicts("y", ((i, j) for i in range(len(maestros)) for j in range(k)), cat=pulp.LpBinary)
+    S = pulp.LpVariable.dicts("S", range(k), lowBound=0, cat=pulp.LpContinuous)
+    S_max = pulp.LpVariable("S_max", lowBound=0, cat=pulp.LpContinuous)
+    S_min = pulp.LpVariable("S_min", lowBound=0, cat=pulp.LpContinuous)
+
+    modelo += S_max - S_min
+
+    for i in range(len(maestros)):
+        modelo += pulp.lpSum(y[i, j] for j in range(k)) == 1
+
+    for j in range(k):
+        modelo += S[j] == pulp.lpSum(maestros[i] * y[i, j] for i in range(len(maestros)))
+
+    for j in range(k):
+        modelo += S_max >= S[j]
+        modelo += S_min <= S[j]
+
+    modelo.solve()
+
+    if modelo.status == pulp.LpStatusOptimal:
+        grupos = []
+        for j in range(k):
+            grupo = [i for i in range(len(maestros)) if pulp.value(y[i, j]) > 0.5]
+            grupos.append(grupo)
+        diferencia_minima = pulp.value(S_max) - pulp.value(S_min)
+        return grupos, diferencia_minima
+    else:
+        return None, None
 
 def graficar_aproximacion_greedy():
     listaTamanios = []
@@ -204,12 +210,15 @@ def graficar_tiempo_aproximacion_pl():
             caso = f"casosComparacion/caso{i}_{n}.txt"
             k, maestros = leer_archivo(caso)
             inicio = time.time()
-            calcular_coeficiente(backtracking(caso))
+            backtracking(caso)
             fin = time.time()
             listaDuraciones_bt.append(fin - inicio)
             listaTamanios_bt.append(indice)
+            nombres = [nombre for nombre, habilidad in maestros]
+            habilidades = [habilidad for nombre, habilidad in maestros]
+
             inicio = time.time()
-            calcular_coeficiente(pl(maestros, k))
+            grupos, diferencia_minima = pl(habilidades, k)
             fin = time.time()
             listaDuraciones_pl.append(fin - inicio)
             listaTamanios_pl.append(indice)
@@ -222,6 +231,14 @@ def graficar_tiempo_aproximacion_pl():
     plt.grid(True)
     plt.show()
 
+
+def crear_diccionario_maestros(maestros):
+    dic = {}
+    for elem in maestros:
+        dic[int(elem[0])] = int(elem[1])
+    return dic
+
+
 def graficar_aproximacion_pl():
     listaTamanios = []
     listaDuraciones = []
@@ -232,7 +249,17 @@ def graficar_aproximacion_pl():
             caso = f"casosComparacion/caso{i}_{n}.txt"
             k, maestros = leer_archivo(caso)
             sol_optima = calcular_coeficiente(backtracking(caso))
-            sol_pl = calcular_coeficiente(pl(maestros, k))
+            habilidades = [habilidad for nombre, habilidad in maestros]
+
+            grupos, diferencia_minima = pl(habilidades, k)
+            diccionario = crear_diccionario_maestros(maestros)
+            valores = []
+            for g in grupos:
+                nuevo = set()
+                for elem in g:
+                    nuevo.add((elem, diccionario[elem]))
+                valores.append(nuevo)
+            sol_pl = calcular_coeficiente(valores)
             indice += 1
             promedio += sol_pl / sol_optima
         listaTamanios.append(i)
@@ -244,6 +271,130 @@ def graficar_aproximacion_pl():
     plt.ylabel('r(A)')
     plt.grid(True)
     plt.gcf().axes[0].yaxis.get_major_formatter().set_scientific(False)
+    plt.show()
+
+def graficar_aproximaciones_pl():
+    listaTamanios_pl1 = []
+    listaDuraciones_pl1 = []
+    listaTamanios_pl2 = []
+    listaDuraciones_pl2 = []
+    indice = 0
+    for i in range(2, 5):
+        for n in range(4):
+            caso = f"casosComparacion/caso{i}_{n}.txt"
+            k, maestros = leer_archivo(caso)
+            habilidades = [habilidad for nombre, habilidad in maestros]
+
+            grupos, diferencia_minima = pl(habilidades, k)
+            diccionario = crear_diccionario_maestros(maestros)
+            valores = []
+            for g in grupos:
+                nuevo = set()
+                for elem in g:
+                    nuevo.add((elem, diccionario[elem]))
+                valores.append(nuevo)
+            sol_pl1 = calcular_coeficiente(valores)
+            sol_pl2 = calcular_coeficiente(aproximacion.aproximacion_pl(maestros, k))
+            indice += 1
+            listaTamanios_pl1.append(indice)
+            listaTamanios_pl2.append(indice)
+            listaDuraciones_pl1.append(sol_pl1)
+            listaDuraciones_pl2.append(sol_pl2)
+    plt.figure(figsize=(10, 6))
+    plt.plot(listaTamanios_pl1, listaDuraciones_pl1, marker='o', linestyle='-', color="blue")
+    plt.plot(listaTamanios_pl2, listaDuraciones_pl2, marker='o', linestyle='-', color="red")
+    plt.title('Comparación resultados algoritmos por programación lineal')
+    plt.xlabel('Cantidad de grupos')
+    plt.ylabel('Coeficiente')
+    plt.grid(True)
+    plt.show()
+
+
+def graficar_tiempo_aproximaciones_pl():
+    listaTamanios_pl2 = []
+    listaDuraciones_pl2 = []
+    listaTamanios_pl1 = []
+    listaDuraciones_pl1 = []
+    indice = 0
+    for i in range(2, 6):
+        for n in range(4):
+            caso = f"casosComparacion/caso{i}_{n}.txt"
+            k, maestros = leer_archivo(caso)
+            inicio = time.time()
+            aproximacion.aproximacion_pl(maestros, k)
+            fin = time.time()
+            listaDuraciones_pl2.append(fin - inicio)
+            listaTamanios_pl2.append(indice)
+            habilidades = [habilidad for nombre, habilidad in maestros]
+            inicio = time.time()
+            pl(habilidades, k)
+            fin = time.time()
+            listaDuraciones_pl1.append(fin - inicio)
+            listaTamanios_pl1.append(indice)
+            indice += 1
+    plt.figure(figsize=(10, 6))
+    plt.plot(listaTamanios_pl2, listaDuraciones_pl2, marker='o', linestyle='-', color="blue")
+    plt.plot(listaTamanios_pl1, listaDuraciones_pl1, marker='o', linestyle='-', color="red")
+    plt.title('Comparación de Tiempo Algoritmos por Programación Lineal')
+    plt.ylabel('Tiempo (s)')
+    plt.grid(True)
+    plt.show()
+
+
+def graficar_aproximaciones_vs_greedy():
+    listaTamanios_pl = []
+    listaDuraciones_pl = []
+    listaTamanios_greedy = []
+    listaDuraciones_greedy = []
+    indice = 0
+    for i in range(2, 5):
+        for n in range(4):
+            caso = f"casosComparacion/caso{i}_{n}.txt"
+            k, maestros = leer_archivo(caso)
+            sol_pl = calcular_coeficiente(aproximacion.aproximacion_pl(maestros, k))
+            sol_greedy = calcular_coeficiente(greedy1(maestros, k))
+            indice += 1
+            listaTamanios_pl.append(indice)
+            listaTamanios_greedy.append(indice)
+            listaDuraciones_pl.append(sol_pl)
+            listaDuraciones_greedy.append(sol_greedy)
+    plt.figure(figsize=(10, 6))
+    plt.plot(listaTamanios_pl, listaDuraciones_pl, marker='o', linestyle='-', color="blue")
+    plt.plot(listaTamanios_greedy, listaDuraciones_greedy, marker='o', linestyle='-', color="red")
+    plt.title('Comparación resultados programación lineal vs greedy')
+    plt.xlabel('Cantidad de grupos')
+    plt.ylabel('Coeficiente')
+    plt.grid(True)
+    plt.show()
+
+
+def graficar_tiempo_aproximaciones_vs_greedy():
+    listaTamanios_pl = []
+    listaDuraciones_pl = []
+    listaTamanios_greedy = []
+    listaDuraciones_greedy = []
+    indice = 0
+    for i in range(2, 5):
+        for n in range(4):
+            caso = f"casosComparacion/caso{i}_{n}.txt"
+            k, maestros = leer_archivo(caso)
+            ini = time.time()
+            aproximacion.aproximacion_pl(maestros, k)
+            fin = time.time()
+            listaDuraciones_pl.append(fin - ini)
+            ini = time.time()
+            greedy1(maestros, k)
+            fin = time.time()
+            listaDuraciones_greedy.append(fin - ini)
+            indice += 1
+            listaTamanios_pl.append(indice)
+            listaTamanios_greedy.append(indice)
+    plt.figure(figsize=(10, 6))
+    plt.plot(listaTamanios_pl, listaDuraciones_pl, marker='o', linestyle='-', color="blue")
+    plt.plot(listaTamanios_greedy, listaDuraciones_greedy, marker='o', linestyle='-', color="red")
+    plt.title('Comparación Tiempo programación lineal vs greedy')
+    plt.ylabel('Tiempo (s)')
+    plt.grid(True)
     plt.show()
 
 
@@ -268,4 +419,4 @@ def graficar_backtracking_tiempo():
     plt.show()
 
 
-graficar_aproximacion_pl()
+graficar_tiempo_aproximaciones_vs_greedy()
